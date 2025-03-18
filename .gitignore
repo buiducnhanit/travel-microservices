@@ -1,0 +1,69 @@
+# ==============================
+# 🔹 COMMON IGNORE 
+# ==============================
+
+# Ignore node_modules cho cả BE & FE
+node_modules/
+dist/
+build/
+
+# Ignore file môi trường
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Ignore lock file
+package-lock.json
+
+# Ignore log files
+npm-debug.log*
+
+# Ignore IDE / Editor files
+.vscode/
+.idea/
+*.iml
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Ignore hệ điều hành
+.DS_Store
+Thumbs.db
+
+# ==============================
+# 🔹 BACKEND (Node.js Microservices)
+# ==============================
+
+# Ignore output từ build tools
+/.next/
+/.nuxt/
+/out/
+/coverage/
+/lib/
+/logs/
+/tmp/
+/pids/
+
+# Ignore các file của Docker
+docker-compose.override.yml
+Dockerfile
+.dockerignore
+
+# ==============================
+# 🔹 FRONTEND (React Vite)
+# ==============================
+
+# Ignore build files
+/public/build/
+/.vite/
+
+# Ignore test coverage
+/coverage/
+
+# Ignore hệ thống cache
+.cache/
+.eslintcache
