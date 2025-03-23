@@ -1,0 +1,105 @@
+http:
+  port: 5000
+
+apiEndpoints:
+  default:
+    host: "*"
+    paths: "/api/*"
+
+serviceEndpoints:
+  authService:
+    url: "${AUTH_SERVICE_URL}"
+  userService:
+    url: "${USER_SERVICE_URL}"
+  tourService:
+    url: "${TOUR_SERVICE_URL}"
+  destinationService:
+    url: "${DESTINATION_SERVICE_URL}"
+
+policies:
+  - proxy
+  - cors
+  - rate-limit
+  - jwt
+
+pipelines:  
+  default:
+    apiEndpoints:
+      - default
+    policies:
+      - proxy:
+          - condition:
+              name: "pathMatch"
+              pattern: "^/api/auth/(login|register)"
+            action:
+              serviceEndpoint: authService
+              changeOrigin: true
+      - jwt:
+        - condition:
+            name: "pathMatch"
+            pattern: "^/api/(auth|roles|tours|destinations)"
+          action:
+            secretOrPublicKey: "${JWT_SECRET}"
+            authScheme: "Bearer"
+            credentialsRequired: true
+
+      - jwt:
+        - condition:
+            name: "pathMatch"
+            pattern: "^/api/users|^/api/roles"
+          action:
+            secretOrPublicKey: "${JWT_SECRET}"
+            authScheme: "Bearer"
+            credentialsRequired: true
+            verifyOptions:
+              algorithms: ["HS256"]
+            checkCredential:
+              role: "admin"
+
+      - cors:
+          - action:
+              allowOrigin: "*"
+              allowMethods: "GET,POST,PUT,DELETE"
+              allowHeaders: "Content-Type, Authorization"
+
+      - rate-limit:
+          - action:
+              max: 100
+              windowMs: 60000
+              message: "Too many requests, please try again later."
+
+      - proxy:
+          - condition:
+              name: "pathMatch"
+              pattern: "^/api/auth"
+            action:
+              serviceEndpoint: authService
+              changeOrigin: true
+
+          - condition:
+              name: "pathMatch"
+              pattern: "^/api/roles"
+            action:
+              serviceEndpoint: authService
+              changeOrigin: true
+
+          - condition:
+              name: "pathMatch"
+              pattern: "^/api/users"
+            action:
+              serviceEndpoint: userService
+              changeOrigin: true
+
+          - condition:
+              name: "pathMatch"
+              pattern: "^/api/tours"
+            action:
+              serviceEndpoint: tourService
+              changeOrigin: true
+
+          - condition:
+              name: "pathMatch"
+              pattern: "^/api/destinations"
+            action:
+              serviceEndpoint: destinationService
+              changeOrigin: true
