@@ -15,12 +15,14 @@ serviceEndpoints:
     url: "${TOUR_SERVICE_URL}"
   destinationService:
     url: "${DESTINATION_SERVICE_URL}"
+  bookingService:
+    url: "${BOOKING_SERVICE_URL}"
+
 
 policies:
   - proxy
   - cors
   - rate-limit
-  - jwt
 
 pipelines:  
   default:
@@ -34,27 +36,6 @@ pipelines:
             action:
               serviceEndpoint: authService
               changeOrigin: true
-      - jwt:
-        - condition:
-            name: "pathMatch"
-            pattern: "^/api/(auth|roles|tours|destinations)"
-          action:
-            secretOrPublicKey: "${JWT_SECRET}"
-            authScheme: "Bearer"
-            credentialsRequired: true
-
-      - jwt:
-        - condition:
-            name: "pathMatch"
-            pattern: "^/api/users|^/api/roles"
-          action:
-            secretOrPublicKey: "${JWT_SECRET}"
-            authScheme: "Bearer"
-            credentialsRequired: true
-            verifyOptions:
-              algorithms: ["HS256"]
-            checkCredential:
-              role: "admin"
 
       - cors:
           - action:
@@ -103,3 +84,11 @@ pipelines:
             action:
               serviceEndpoint: destinationService
               changeOrigin: true
+
+          - condition:
+              name: "pathMatch"
+              pattern: "^/api/bookings"
+            action:
+              serviceEndpoint: bookingService
+              changeOrigin: true
+
