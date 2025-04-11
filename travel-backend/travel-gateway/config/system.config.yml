@@ -7,9 +7,11 @@ db:
 #plugins:
   # express-gateway-plugin-example:
   #   param1: 'param from system.config' 
-# plugins:
-#   express-gateway-plugin-jwt:
-#     package: express-gateway-plugin-jwt
+plugins:
+  custom-jwt:
+    package: ./plugins/custom-jwt/manifest.js
+  role-check:
+    package: "./plugins/role-check/manifest.js"
 
 crypto:
   cipherKey: sensitiveKey
