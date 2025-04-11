@@ -3,11 +3,11 @@ const tourRepository = require("../repositories/tourRepository");
 const cloudinary = require("../config/cloudinary");
 
 exports.getImagesByTour = async (tourId) => {
-    return await tourImageRepository.getImagesByDestinationId(tourId);
+    return await tourImageRepository.getImagesByTourId(tourId);
 };
 
 exports.deleteImagesByTourId = async (tourId) => {
-    return await tourImageRepository.deleteImagesByDestinationId(tourId);
+    return await tourImageRepository.deleteImagesByTourId(tourId);
 };
 
 exports.uploadImages = async (tour, files) => {

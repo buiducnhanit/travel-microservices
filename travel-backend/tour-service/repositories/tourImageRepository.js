@@ -16,6 +16,6 @@ exports.deleteImagesByTourId = async (tour) => {
     return await TourImage.deleteMany({ tour });
 };
 
-exports.deleteImageByCloudinaryId = async (tour) => {
-    return await TourImage.findOneAndDelete({ tour });
+exports.deleteImageByCloudinaryId = async (cloudinaryId) => {
+    return await TourImage.findOneAndDelete({ cloudinaryId });
 };
