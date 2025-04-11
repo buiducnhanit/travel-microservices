@@ -21,7 +21,7 @@ exports.getTourById = async (tourId) => {
 
 exports.updateTour = async (tourId, updateData, files) => {
 
-    if (files && files.length > 0) {    
+    if (files && files.length > 0) {
         const oldImages = await tourImageService.getImagesByTour(tourId);
 
         for (let image of oldImages) {
@@ -42,3 +42,29 @@ exports.deleteTour = async (tourId) => {
     }
     return tour;
 };
+
+exports.searchTours = async (query) => {
+    let filters = { isDeleted: false };
+
+    if (query.searchText) {
+        filters.name = { $regex: query.searchText, $options: "i" };
+    }
+    if (query.destination) {
+        filters.destinations = query.destination;
+    }
+    if (query.minPrice || query.maxPrice) {
+        filters.price = {};
+        if (query.minPrice) filters.price.$gte = Number(query.minPrice);
+        if (query.maxPrice) filters.price.$lte = Number(query.maxPrice);
+    }
+    if (query.minDays || query.maxDays) {
+        filters.duration = {};
+        if (query.minDays) filters.duration.$gte = Number(query.minDays);
+        if (query.maxDays) filters.duration.$lte = Number(query.maxDays);
+    }
+    if (query.requiredSlots) {
+        filters.availableSlots = { $gte: Number(query.requiredSlots) };
+    }
+
+    return await tourRepository.findTours(filters);
+}
