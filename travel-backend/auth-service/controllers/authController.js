@@ -26,13 +26,7 @@ exports.getMe = async (req, res) => {
         if (!user) {
             return res.status(403).json({ message: "Unauthorized" });
         }
-
-        res.json({
-            id: user._id,
-            name: user.name,
-            email: user.email,
-            role: user.role ? user.role.name : "No Role",
-        });
+        res.json({ user });
     } catch (error) {
         res.status(403).json({ message: error.message });
     }
@@ -47,9 +41,22 @@ exports.getAllUsers = async (req, res) => {
     }
 };
 
+exports.getUserById = async (req, res) => {
+    try {
+        const user = await authService.getUserById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
 exports.updateUser = async (req, res) => {
     try {
-        const updatedUser = await authService.updateUser(req.params.id, req.body);
+        const user = await authService.updateUser(req.params.id, req.body);
+        const updatedUser = await authService.getUserById(user._id);
         res.json({ message: "User updated successfully", updatedUser });
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -60,6 +67,51 @@ exports.deleteUser = async (req, res) => {
     try {
         await authService.deleteUser(req.params.id);
         res.json({ message: "User deleted successfully" });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+exports.updateProfileImage = async (req, res) => {
+    try {
+        if (!req.file || !req.file.path) {
+            return res.status(400).json({ message: "No file uploaded" });
+        }
+
+        const { id } = req.body;
+        if (!id) {
+            return res.status(400).json({ message: "User ID is required" });
+        }
+
+        const imageUrl = req.file.path;
+
+        const updatedUser = await userService.updateUserProfileImage(id, imageUrl);
+
+        return res.status(200).json({
+            message: "Profile image updated successfully",
+            profileImage: updatedUser.profileImage,
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Server error" });
+    }
+}
+
+exports.forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        await authService.forgotPassword(email);
+        res.json({ message: "Password reset link sent to email" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+exports.changePassword = async (req, res) => {
+    try {
+        const { id, oldPassword, newPassword } = req.body;
+        await authService.changePassword(id, oldPassword, newPassword);
+        res.json({ message: "Password changed successfully" });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
