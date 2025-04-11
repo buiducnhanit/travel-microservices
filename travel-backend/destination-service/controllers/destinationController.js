@@ -2,7 +2,13 @@ const destinationService = require("../services/destinationService");
 
 exports.createDestination = async (req, res) => {
     try {
+        console.log("Headers:", req.headers);
+        console.log("Body keys:", Object.keys(req.body));
+        console.log("Raw body:", req.body);
+        console.log("Raw destinationData:", req.body.destinationData);
+        console.log("Files:", req.files);
         const destinationData = JSON.parse(req.body.destinationData);
+        console.log("Parsed destinationData:", destinationData);
         const destination = await destinationService.createDestination(destinationData, req.files);
         const newDestination = await destinationService.getDestinationById(destination._id);
         res.status(201).json({ message: "Destination created successfully", newDestination });
@@ -33,7 +39,7 @@ exports.getDestinationById = async (req, res) => {
 exports.updateDestination = async (req, res) => {
     try {
         const destinationId = req.params.id;
-        const updateData = req.body;
+        const updateData = req.body.destinationData ? JSON.parse(req.body.destinationData) : {};
         const files = req.files;
 
         const destination = await destinationService.updateDestination(destinationId, updateData, files);
