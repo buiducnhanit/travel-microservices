@@ -2,15 +2,35 @@ http:
   port: 5000
 
 apiEndpoints:
-  default:
+  authApi:
     host: "*"
-    paths: "/api/*"
+    paths:
+      - "/api/auth"
+      - "/api/auth/*"
+      - "/api/roles"
+      - "/api/roles/*"
+
+  tourApi:
+    host: "*"
+    paths:
+      - "/api/tours"
+      - "/api/tours/*"
+
+  destinationApi:
+    host: "*"
+    paths:
+      - "/api/destinations"
+      - "/api/destinations/*"
+
+  bookingApi:
+    host: "*"
+    paths:
+      - "/api/bookings"
+      - "/api/bookings/*"
 
 serviceEndpoints:
   authService:
     url: "${AUTH_SERVICE_URL}"
-  userService:
-    url: "${USER_SERVICE_URL}"
   tourService:
     url: "${TOUR_SERVICE_URL}"
   destinationService:
@@ -18,73 +38,43 @@ serviceEndpoints:
   bookingService:
     url: "${BOOKING_SERVICE_URL}"
 
-
 policies:
   - proxy
   - cors
   - rate-limit
+  - custom-jwt
+  - role-check
 
-pipelines:  
-  default:
+pipelines:
+  public:
     apiEndpoints:
-      - default
+      - tourApi
+      - destinationApi
+      - bookingApi
     policies:
-      - proxy:
-          - condition:
-              name: "pathMatch"
-              pattern: "^/api/auth/(login|register)"
-            action:
-              serviceEndpoint: authService
-              changeOrigin: true
-
       - cors:
           - action:
               allowOrigin: "*"
               allowMethods: "GET,POST,PUT,DELETE"
               allowHeaders: "Content-Type, Authorization"
-
       - rate-limit:
           - action:
               max: 100
               windowMs: 60000
               message: "Too many requests, please try again later."
-
       - proxy:
-          - condition:
-              name: "pathMatch"
-              pattern: "^/api/auth"
-            action:
-              serviceEndpoint: authService
-              changeOrigin: true
-
-          - condition:
-              name: "pathMatch"
-              pattern: "^/api/roles"
-            action:
-              serviceEndpoint: authService
-              changeOrigin: true
-
-          - condition:
-              name: "pathMatch"
-              pattern: "^/api/users"
-            action:
-              serviceEndpoint: userService
-              changeOrigin: true
-
           - condition:
               name: "pathMatch"
               pattern: "^/api/tours"
             action:
               serviceEndpoint: tourService
               changeOrigin: true
-
           - condition:
               name: "pathMatch"
               pattern: "^/api/destinations"
             action:
               serviceEndpoint: destinationService
               changeOrigin: true
-
           - condition:
               name: "pathMatch"
               pattern: "^/api/bookings"
@@ -92,3 +82,105 @@ pipelines:
               serviceEndpoint: bookingService
               changeOrigin: true
 
+  auth:
+    apiEndpoints:
+      - authApi
+    policies:
+      - cors:
+          - action:
+              allowOrigin: "*"
+              allowMethods: "GET,POST,PUT,DELETE"
+              allowHeaders: "Content-Type, Authorization"
+      - rate-limit:
+          - action:
+              max: 100
+              windowMs: 60000
+              message: "Too many requests, please try again later."
+      - custom-jwt:
+          - condition:
+              name: "expression"
+              expression: "req.path !== '/api/auth/login' && req.path !== '/api/auth/register' && req.path !== '/api/auth/change-password'"
+            action:
+              secretOrPublicKey: "${JWT_SECRET}"
+      - role-check:
+        - condition:
+            name: "expression"
+            expression: "req.path !== '/api/auth/login' && req.path !== '/api/auth/register' && req.path !== '/api/auth/change-password'"
+          action:
+            role: "Admin"
+      - proxy:
+          - action:
+              serviceEndpoint: authService
+              changeOrigin: true
+
+  secured:
+    apiEndpoints:
+      - tourApi
+      - destinationApi
+      - bookingApi
+    policies:
+      - cors:
+          - action:
+              allowOrigin: "*"
+              allowMethods: "GET,POST,PUT,DELETE"
+              allowHeaders: "Content-Type, Authorization"
+      - rate-limit:
+          - action:
+              max: 100
+              windowMs: 60000
+              message: "Too many requests, please try again later."
+      - custom-jwt:
+          - condition:
+              name: "expression"
+              expression: "req.method !== 'GET'"
+            action:
+              secretOrPublicKey: "${JWT_SECRET}"
+      - proxy:
+          - condition:
+              name: "pathMatch"
+              pattern: "^/api/tours"
+            action:
+              serviceEndpoint: tourService
+              changeOrigin: true
+          - condition:
+              name: "pathMatch"
+              pattern: "^/api/destinations"
+            action:
+              serviceEndpoint: destinationService
+              changeOrigin: true
+          - condition:
+              name: "pathMatch"
+              pattern: "^/api/bookings"
+            action:
+              serviceEndpoint: bookingService
+              changeOrigin: true
+      
+      - role-check:
+          - conditions:
+              - name: "expression"
+                expression: "req.method === 'POST' || req.method === 'PUT' || req.method === 'DELETE'"
+              - name: "pathMatch"
+                pattern: "^/api/tours"
+            action:
+              role: "Admin"
+          - conditions:
+              - name: "expression"
+                expression: "req.method === 'POST' || req.method === 'PUT' || req.method === 'DELETE'"
+              - name: "pathMatch"
+                pattern: "^/api/destinations"
+            action:
+              role: "Admin"
+          - conditions:
+              - name: "expression"
+                expression: "req.method === 'POST' || req.method === 'PUT' || req.method === 'DELETE'"
+              - name: "pathMatch"
+                pattern: "^/api/bookings"
+            action:
+              role: "User"
+          - conditions:
+              - name: "expression"
+                expression: "req.method === 'POST' || req.method === 'PUT' || req.method === 'DELETE'"
+              - name: "pathMatch"
+                pattern: "^/api/bookings"
+            action:
+              role: "Admin"
