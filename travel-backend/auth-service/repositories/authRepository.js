@@ -24,3 +24,7 @@ exports.updateUser = async (id, updateData) => {
 exports.deleteUser = async (id) => {
     return await User.findByIdAndUpdate(id, { isDeleted: true }, { new: true });
 };
+
+exports.updateProfileImage = async (userId, imageUrl) => {
+    return await User.findByIdAndUpdate(userId, { avatar: imageUrl }, { new: true });
+}

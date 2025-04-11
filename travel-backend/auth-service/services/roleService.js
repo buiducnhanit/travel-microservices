@@ -5,7 +5,7 @@ exports.createRole = async (name) => {
     if (existingRole) {
         throw new Error("Role already exists");
     }
-    return await roleRepository.create({ name });
+    return await roleRepository.createRole({ name });
 };
 
 exports.getAllRoles = async () => {
