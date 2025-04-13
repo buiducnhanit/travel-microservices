@@ -47,6 +47,7 @@ const Account: React.FC = () => {
 
     const handleLogout = () => {
         localStorage.removeItem('token');
+        localStorage.removeItem('auth');
         window.location.href = '/login';
     }
 
