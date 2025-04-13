@@ -26,7 +26,7 @@ const ManageTours: React.FC = () => {
     );
 
     const handleCreateTour = () => {
-        navigate(`/dashboard/tours/add`);
+        navigate(`/dashboard/tours/create`);
     };
 
     // Cập nhật tour
