@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import ButtonCustom from '../../components/user/ButtonCustom/ButtonCustom';
 import Breadcrumb from '../../components/user/Breadcrumb';
-import { changePassword, getMyInformation } from '../../services/authService';
+import { changePassword, getMyInformation, updateInformation } from '../../services/authService';
 import { Booking } from '../../types/Booking';
 import { getBookingHistory } from '../../services/bookingService';
 import { useSearchParams } from 'react-router-dom';
@@ -13,8 +13,8 @@ const Account: React.FC = () => {
     const [bookingHistory, setBookingHistory] = useState<Booking[]>([]);
 
     const [formData, setFormData] = useState({
+        fullname: '',
         username: '',
-        name: '',
         email: '',
         phone: '',
         address: ''
@@ -40,9 +40,16 @@ const Account: React.FC = () => {
         setPasswordData((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         console.log(formData);
+        try {
+            await updateInformation(formData);
+            alert("Update information successfully!");
+        } catch (error) {
+            console.error("Failed to update information:", error);
+            alert("Failed to update information. Please try again.");
+        }
     }
 
     const handleLogout = () => {
@@ -77,9 +84,10 @@ const Account: React.FC = () => {
         const fetchUserInfo = async () => {
             try {
                 const userInfo = await getMyInformation();
+                console.log(userInfo)
                 setFormData({
-                    username: userInfo.user.fullname || '',
-                    name: userInfo.user.username || '',
+                    fullname: userInfo.user.fullname || '',
+                    username: userInfo.user.username || '',
                     email: userInfo.user.email || '',
                     phone: userInfo.user.phone || '',
                     address: userInfo.user.address || ''
@@ -171,12 +179,12 @@ const Account: React.FC = () => {
                                         <form onSubmit={handleSubmit} className="space-y-6">
                                             {/* Name Field */}
                                             <div>
-                                                <label htmlFor="username" className="block text-sm font-medium text-gray-700">Full Name</label>
+                                                <label htmlFor="fullname" className="block text-sm font-medium text-gray-700">Full Name</label>
                                                 <input
                                                     type="text"
-                                                    name="username"
-                                                    id="username"
-                                                    value={formData.username}
+                                                    name="fullname"
+                                                    id="fullname"
+                                                    value={formData.fullname}
                                                     onChange={handleInputChange}
                                                     className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                                     placeholder="Enter your user name"
@@ -185,12 +193,12 @@ const Account: React.FC = () => {
 
                                             {/* Username Field */}
                                             <div>
-                                                <label htmlFor="name" className="block text-sm font-medium text-gray-700">User Name</label>
+                                                <label htmlFor="username" className="block text-sm font-medium text-gray-700">User Name</label>
                                                 <input
                                                     type="text"
-                                                    name="name"
-                                                    id="name"
-                                                    value={formData.name}
+                                                    name="username"
+                                                    id="username"
+                                                    value={formData.username}
                                                     onChange={handleInputChange}
                                                     className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                                     placeholder="Enter your user name"

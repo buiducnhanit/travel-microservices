@@ -27,6 +27,9 @@ export const getDestinationById = async (destinationId: string): Promise<Destina
 
 // Tạo một destination mới
 export const createDestination = async (destinationData: Partial<Destination>, images: File[]): Promise<Destination> => {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("No token found");
+
     const formData = new FormData();
 
     formData.append("destinationData", JSON.stringify(destinationData));
@@ -36,6 +39,7 @@ export const createDestination = async (destinationData: Partial<Destination>, i
     const response = await axios.post<Destination>(`${API_BASE_URL}/destinations`, formData, {
         headers: {
             "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`
         },
     });
 
@@ -44,6 +48,9 @@ export const createDestination = async (destinationData: Partial<Destination>, i
 
 // Cập nhật destination
 export const updateDestination = async (destinationId: string, destinationData: Partial<Destination>, images?: File[]): Promise<Destination> => {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("No token found");
+
     const formData = new FormData();
 
     formData.append("destinationData", JSON.stringify(destinationData));
@@ -56,6 +63,7 @@ export const updateDestination = async (destinationId: string, destinationData: 
         const response = await axios.put<Destination>(`${API_BASE_URL}/destinations/${destinationId}`, formData, {
             headers: {
                 "Content-Type": "multipart/form-data",
+                Authorization: `Bearer ${token}`
             },
         });
         return response.data;

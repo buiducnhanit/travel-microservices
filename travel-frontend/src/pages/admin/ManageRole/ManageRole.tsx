@@ -25,7 +25,7 @@ const RolePage: React.FC = () => {
             setRoles(rolesData);
         }
     }, [rolesData]);
-    console.log(roles)
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setUpdatedRole({ ...updatedRole, [e.target.name]: e.target.value });
     };
@@ -39,6 +39,7 @@ const RolePage: React.FC = () => {
             await createRole(newRole);
             setOpen(false);
             setNewRole({ name: "" });
+            alert("Create role successfull")
         } catch (error) {
             console.error("Error creating role:", error);
         }
@@ -58,6 +59,7 @@ const RolePage: React.FC = () => {
             setOpenEdit(false);
             setSelectedRole(null);
             setUpdatedRole({ name: "" });
+            alert("Update role successfull")
         } catch (error) {
             console.error("Error updating role:", error);
         }

@@ -9,7 +9,6 @@ const api = axios.create({
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
-        console.log(token)
         if (token && config.headers) {
             config.headers.Authorization = `Bearer ${token}`;
         }
@@ -29,10 +28,20 @@ export const createRole = (data: Partial<Role>) => {
     });
 };
 
-export const updateRole = (id: string, data: Partial<Role>) => {
-    return api.put(`/roles/${id}`, data);
+export const updateRole = (id: string, name: Partial<Role>) => {
+    const token = localStorage.getItem("token");
+    return api.put(`/roles/${id}`, name, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
 };
 
 export const deleteRole = (id: string) => {
-    return api.delete(`/roles/${id}`);
+    const token = localStorage.getItem("token");
+    return api.delete(`/roles/${id}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
 };

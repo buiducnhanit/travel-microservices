@@ -24,6 +24,8 @@ export const getTourById = async (tourId: string): Promise<Tour | null> => {
 };
 
 export const createTour = async (tourData: Partial<Omit<Tour, "destinations">> & { destinations: string[] }, images: File[]): Promise<Tour> => {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("No token found");
     const formData = new FormData();
 
     formData.append("tourData", JSON.stringify(tourData));
@@ -33,6 +35,7 @@ export const createTour = async (tourData: Partial<Omit<Tour, "destinations">> &
     const response = await axios.post<Tour>(`${API_BASE_URL}/tours`, formData, {
         headers: {
             "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`
         },
     });
 

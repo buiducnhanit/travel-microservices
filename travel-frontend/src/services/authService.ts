@@ -13,7 +13,7 @@ export const login = async (email: string, password: string) => {
 
 export const register = async (name: string, email: string, password: string) => {
     try {
-        await axios.post(`${API_BASE_URL}/auth/register`, { name, email, password });
+        await axios.post(`${API_BASE_URL}/auth/register`, { username: name, email, password });
     } catch (err: any) {
         throw new Error(err.response?.data?.message || "Failed to register");
     }
@@ -34,6 +34,24 @@ export const getMyInformation = async () => {
 
 export const changePassword = async (id: string, oldPassword: string, newPassword: string) => {
     const response = await axios.post(`${API_BASE_URL}/auth/change-password`, { id, oldPassword, newPassword },
+        {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`,
+                "Content-Type": "application/json"
+            }
+        }
+    );
+    return response.data;
+};
+
+export const updateInformation = async (formData: any) => {
+    const authString = localStorage.getItem("auth");
+    if (!authString) throw new Error("No auth data found");
+
+    const auth = JSON.parse(authString);
+    const userId = auth.user.user._id;
+
+    const response = await axios.put(`${API_BASE_URL}/auth/users/${userId}`, formData,
         {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem('token')}`,
